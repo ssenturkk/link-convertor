@@ -1,0 +1,58 @@
+version: '3.4'
+
+services:
+  trendyol-case:
+    image: trendyol-case
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql-db
+      - redis-db
+    environment:
+      - MYSQL_HOST=mysql-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=admin
+      - MYSQL_DATABASE=trendyol
+      - REDIS_HOST=redis-db
+      - REDIS_PORT=6379
+    networks:
+      - mysql
+      - redis
+
+  mysql-db:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: 'trendyol'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'admin'
+      MYSQL_ROOT_PASSWORD: 'admin'
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - mysql
+
+
+  redis-db:
+    image: "redis:6.0.6"
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis-data:/var/lib/redis
+    environment:
+      - REDIS_REPLICATION_MODE=master
+    networks:
+      - redis
+
+# Volumes
+volumes:
+  db-data:
+
+# Networks to be created to facilitate communication between containers
+networks:
+  mysql:
+  redis:
